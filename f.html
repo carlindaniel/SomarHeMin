@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Soma de Horas e Minutos</title>
+    <link rel="stylesheet" type="text/css" href="df.css">
+</head>
+<body>
+    <audio id="som" src="som.mp3"></audio>
+    <h1>Soma de Horas e Minutos</h1>
+    <p>Insira um valor em horas e minutos e clique em "Adicionar" para somar. Use o formato H,M.</p>
+
+    <input type="text" id="valorInput" placeholder="H,M">
+    <button onclick="adicionar()">Adicionar</button>
+
+    <p>Resultado:</p>
+    <p id="resultado">0 horas 0 minutos</p>
+
+    <p>Histórico:</p>
+    <ul id="historico">
+    </ul>
+
+    <button onclick="limpar()">Limpar</button>
+
+    <script>
+        var totalHoras = 0;
+        var totalMinutos = 0;
+        var historicoValores = [];
+
+        function adicionar() {
+            var valorDigitado = document.getElementById('valorInput').value;
+            
+            // Use uma expressão regular para validar o formato HH:MM
+            var regex = /^(\d{1,2}),(\d{1,2})$/;
+            
+            if (regex.test(valorDigitado)) {
+                var partes = valorDigitado.split(',');
+                var horas = parseInt(partes[0], 10);
+                var minutos = parseInt(partes[1], 10);
+                
+                totalHoras += horas;
+                totalMinutos += minutos;
+
+                // Faça a correção dos minutos se excederem 60
+                totalHoras += Math.floor(totalMinutos / 60);
+                totalMinutos = totalMinutos % 60;
+
+                // Adicione o valor ao histórico
+                historicoValores.push(valorDigitado);
+
+                atualizarResultado();
+                atualizarHistorico();
+                
+                // Reproduzir som ao adicionar
+                var som = document.getElementById('som');
+                som.play();
+        
+            } else {
+                alert("Por favor, insira um valor válido no formato H,M.");
+            }
+        }
+
+        function atualizarResultado() {
+            var horasFormatadas = totalHoras.toString().padStart(2, '0');
+            var minutosFormatados = totalMinutos.toString().padStart(2, '0');
+            document.getElementById('resultado').textContent = horasFormatadas + " horas " + minutosFormatados + " minutos";
+        }
+
+        function atualizarHistorico() {
+            var historicoLista = document.getElementById('historico');
+            historicoLista.innerHTML = "";
+            for (var i = 0; i < historicoValores.length; i++) {
+                var item = document.createElement('li');
+                item.textContent = historicoValores[i];
+                historicoLista.appendChild(item);
+            }
+        }
+
+        function limpar() {
+            totalHoras = 0;
+            totalMinutos = 0;
+            document.getElementById('valorInput').value = "";
+            historicoValores = [];
+            atualizarResultado();
+            atualizarHistorico();
+
+            // Reproduzir som ao limpar
+            var som = document.getElementById('som');
+            som.play();
+        }
+    </script>
+</body>
+</html>
