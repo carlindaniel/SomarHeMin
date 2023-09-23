@@ -3,18 +3,16 @@
 <head>
     <title>Soma de Horas e Minutos</title>
     <link rel="stylesheet" type="text/css" href="df.css">
-<style>
-</style>
-
 </head>
 
 <body>
     <audio id="som" src="som.mp3"></audio>
     <h1>Soma de Horas e Minutos</h1>
     <p>Insira um valor em horas e minutos e clique em "Adicionar" para somar. Use o formato Horas,Minutos.</p>
-<h3>Se for somar só minutos coloque o 0,"é os minutos após a virgula"</h3>
+    <h3>Se for somar só minutos coloque o 0,"é os minutos após a vírgula"</h3>
     <input type="text" id="valorInput" placeholder="Horas,Minutos">
     <button onclick="adicionar()">Adicionar</button>
+    <button onclick="copiarResultado()">Copiar Resultado</button> <!-- Add Copy Result button -->
 
     <p>Resultado:</p>
     <p id="resultado">0 horas 0 minutos</p>
@@ -25,7 +23,8 @@
         </ul>
     </div>
     <button onclick="limpar()">Limpar</button>
-<script>
+    
+    <script>
         var totalHoras = 0;
         var totalMinutos = 0;
         var historicoValores = []; // Array para armazenar os últimos 3 valores
@@ -48,54 +47,67 @@
                 totalHoras += Math.floor(totalMinutos / 60);
                 totalMinutos = totalMinutos % 60;
 
-       // Adicione o valor atual ao histórico
-       historicoValores.push(valorDigitado);
-        if (historicoValores.length > 3) {
-            historicoValores.shift(); // Remova o valor mais antigo se houver mais de 3
-        }
+                // Adicione o valor atual ao histórico
+                historicoValores.push(valorDigitado);
+                if (historicoValores.length > 3) {
+                    historicoValores.shift(); // Remova o valor mais antigo se houver mais de 3
+                }
                 atualizarResultado();
                 atualizarHistorico();
-                 // Reproduzir som ao adicionar
-        var som = document.getElementById('som');
-        som.play();
-        
+
+                // Limpe o campo de entrada após adicionar
+                document.getElementById('valorInput').value = "";
+
+                // Reproduzir som ao adicionar
+                var som = document.getElementById('som');
+                som.play();
             } else {
                 alert("Por favor, insira um valor válido no formato H,M.");
             }
         }
 
+        function copiarResultado() {
+            var resultado = document.getElementById('resultado').textContent;
+            // Create a temporary input element to copy the result
+            var tempInput = document.createElement('input');
+            document.body.appendChild(tempInput);
+            tempInput.value = resultado;
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('Resultado copiado para a área de transferência.');
+        }
+
         function atualizarResultado() {
             var horasFormatadas = totalHoras.toString().padStart(2, '0');
             var minutosFormatados = totalMinutos.toString().padStart(2, '0');
-            document.getElementById('resultado').textContent = horasFormatadas + " horas " + minutosFormatados + " minutos";
+            document.getElementById('resultado').textContent = horasFormatadas + " h e " + minutosFormatados + " min";
         }
 
         function atualizarHistorico() {
-    var listaHistorico = document.getElementById('listaHistorico');
-    listaHistorico.innerHTML = ""; // Limpe a lista
+            var listaHistorico = document.getElementById('listaHistorico');
+            listaHistorico.innerHTML = ""; // Limpe a lista
 
-    for (var i = 0; i < historicoValores.length; i++) {
-        var itemHistorico = document.createElement('li');
-        itemHistorico.textContent = historicoValores[i];
-        listaHistorico.appendChild(itemHistorico);
-    }
-}
+            for (var i = 0; i < historicoValores.length; i++) {
+                var itemHistorico = document.createElement('li');
+                itemHistorico.textContent = historicoValores[i];
+                listaHistorico.appendChild(itemHistorico);
+            }
+        }
 
-function limpar() {
+        function limpar() {
             totalHoras = 0;
             totalMinutos = 0;
             document.getElementById('valorInput').value = "";
             atualizarResultado();
-    
-             // Limpar também o histórico
-    historicoValores = [];
-    atualizarHistorico();
+            // Limpar também o histórico
+            historicoValores = [];
+            atualizarHistorico();
 
             // Reproduzir som ao limpar
-    var som = document.getElementById('som');
-    som.play();
+            var som = document.getElementById('som');
+            som.play();
         }
-
     </script>
 </body>
 </html>
