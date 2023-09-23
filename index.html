@@ -86,7 +86,10 @@ function limpar() {
             totalMinutos = 0;
             document.getElementById('valorInput').value = "";
             atualizarResultado();
-            
+    
+             // Limpar também o histórico
+    historicoValores = [];
+    atualizarHistorico();
 
             // Reproduzir som ao limpar
     var som = document.getElementById('som');
