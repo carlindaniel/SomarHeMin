@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Soma de Horas e Minutos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soma de Horas, Minutos e Segundos</title>
     <link rel="stylesheet" type="text/css" href="df.css">
 </head>
 
 <body>
     <audio id="som" src="som.mp3"></audio>
-    <h1>Soma de Horas e Minutos</h1>
-    <p>Insira um valor em horas e minutos e clique em "Adicionar" para somar. Use o formato Horas,Minutos.</p>
-    <h3>Se for somar só minutos coloque o 0,"é os minutos após a vírgula"</h3>
-    <input type="text" id="valorInput" placeholder="Horas,Minutos">
+    <h1>Soma de Horas, Minutos e Segundos</h1>
+    <p>Insira um valor no formato HH,MM;SS e clique em "Adicionar" para somar. O campo de segundos é opcional.</p>
+    <input type="text" id="valorInput" placeholder="HH,MM;SS">
     <button onclick="adicionar()">Adicionar</button>
-    <button onclick="copiarResultado()">Copiar Resultado</button> <!-- Add Copy Result button -->
+    <button onclick="copiarResultado()">Copiar Resultado</button>
 
     <p>Resultado:</p>
-    <p id="resultado">0 horas 0 minutos</p>
+    <p id="resultado">0 horas 0 minutos 0 segundos</p>
     <div id="historico">
         <p>Últimos 3 valores adicionados:</p>
         <ul id="listaHistorico">
@@ -27,23 +28,36 @@
     <script>
         var totalHoras = 0;
         var totalMinutos = 0;
+        var totalSegundos = 0;
         var historicoValores = []; // Array para armazenar os últimos 3 valores
 
         function adicionar() {
             var valorDigitado = document.getElementById('valorInput').value;
-            
-            // Use uma expressão regular para validar o formato HH:MM
-            var regex = /^(\d{1,2}),(\d{1,2})$/;
-       
-            if (regex.test(valorDigitado)) {
-                var partes = valorDigitado.split(',');
-                var horas = parseInt(partes[0], 10);
-                var minutos = parseInt(partes[1], 10);
-                
-                totalHoras += horas;
-                totalMinutos += minutos;
 
-                // Faça a correção dos minutos se excederem 60
+            // Use uma expressão regular para validar os diferentes formatos de entrada
+            var regex = /^(\d{1,2})[;,](\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})$/;
+
+            if (regex.test(valorDigitado)) {
+                var partes = valorDigitado.split(/[;,]/);
+
+                if (partes.length === 1) {
+                    // Se houver 1 parte, assumimos que são minutos
+                    totalMinutos += parseInt(partes[0], 10);
+                } else if (partes.length === 2) {
+                    // Se houver 2 partes, assumimos que são horas e minutos ou minutos e segundos
+                    totalHoras += parseInt(partes[0], 10);
+                    totalMinutos += parseInt(partes[1], 10);
+                } else if (partes.length === 3) {
+                    // Se houver 3 partes, assumimos que são horas, minutos e segundos
+                    totalHoras += parseInt(partes[0], 10);
+                    totalMinutos += parseInt(partes[1], 10);
+                    totalSegundos += parseInt(partes[2], 10);
+                }
+
+                // Faça a correção dos minutos e segundos se excederem 60
+                totalMinutos += Math.floor(totalSegundos / 60);
+                totalSegundos = totalSegundos % 60;
+
                 totalHoras += Math.floor(totalMinutos / 60);
                 totalMinutos = totalMinutos % 60;
 
@@ -62,7 +76,7 @@
                 var som = document.getElementById('som');
                 som.play();
             } else {
-                alert("Por favor, insira um valor válido no formato H,M.");
+                alert("Por favor, insira um valor válido no formato HH,MM;SS, HH,MM, MM;SS ou HH,MM;SS.");
             }
         }
 
@@ -81,7 +95,8 @@
         function atualizarResultado() {
             var horasFormatadas = totalHoras.toString().padStart(2, '0');
             var minutosFormatados = totalMinutos.toString().padStart(2, '0');
-            document.getElementById('resultado').textContent = horasFormatadas + " h e " + minutosFormatados + " min";
+            var segundosFormatados = totalSegundos.toString().padStart(2, '0');
+            document.getElementById('resultado').textContent = horasFormatadas + " h " + minutosFormatados + " min " + segundosFormatados + " seg";
         }
 
         function atualizarHistorico() {
@@ -98,6 +113,7 @@
         function limpar() {
             totalHoras = 0;
             totalMinutos = 0;
+            totalSegundos = 0;
             document.getElementById('valorInput').value = "";
             atualizarResultado();
             // Limpar também o histórico
