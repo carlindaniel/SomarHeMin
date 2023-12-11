@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +11,8 @@
 <body>
     <audio id="som" src="som.mp3"></audio>
     <h1>Soma de Horas, Minutos e Segundos</h1>
-    <p>Insira um valor no formato HH,MM;SS e clique em "Adicionar" para somar. O campo de segundos é opcional.</p>
-    <input type="text" id="valorInput" placeholder="HH,MM;SS">
+    <p>Insira um valor no formato Horas,Minutos;Segundos e clique em "Adicionar" para somar. Se colocar so um valor será identificado como minutos; e pode somar só minutos e segundos se quiser.</p>
+    <input type="text" id="valorInput" placeholder="HH,MM;SS" onkeydown="if (event.key === 'Enter') adicionar()">
     <button onclick="adicionar()">Adicionar</button>
     <button onclick="copiarResultado()">Copiar Resultado</button>
 
@@ -24,7 +25,7 @@
         </ul>
     </div>
     <button onclick="limpar()">Limpar</button>
-    
+
     <script>
         var totalHoras = 0;
         var totalMinutos = 0;
@@ -32,61 +33,62 @@
         var historicoValores = []; // Array para armazenar os últimos 3 valores
 
         function adicionar() {
-    var valorDigitado = document.getElementById('valorInput').value;
+            var valorDigitado = document.getElementById('valorInput').value;
 
-    // Use a regular expression to validate the different input formats
-    var regex = /^(\d{1,2})[;,](\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})$/;
+            // Use a regular expression to validate the different input formats
+            var regex = /^(\d{1,2})[;,](\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})[;,](\d{1,2})$|^(\d{1,2})$/;
 
-    if (regex.test(valorDigitado)) {
-        var partes = valorDigitado.split(/[;,]/);
+            if (regex.test(valorDigitado)) {
+                var partes = valorDigitado.split(/[;,]/);
 
-        if (partes.length === 1) {
-            // If there is 1 part, assume it is minutes only
-            totalMinutos += parseInt(partes[0], 10);
-        } else if (partes.length === 2) {
-            // If there are 2 parts, check if it is in the HH,MM or MM;SS format
-            if (valorDigitado.indexOf(';') !== -1) {
-                // MM;SS format
-                totalMinutos += parseInt(partes[0], 10);
-                totalSegundos += parseInt(partes[1], 10);
+                if (partes.length === 1) {
+                    // If there is 1 part, assume it is minutes only
+                    totalMinutos += parseInt(partes[0], 10);
+                } else if (partes.length === 2) {
+                    // If there are 2 parts, check if it is in the HH,MM or MM;SS format
+                    if (valorDigitado.indexOf(';') !== -1) {
+                        // MM;SS format
+                        totalMinutos += parseInt(partes[0], 10);
+                        totalSegundos += parseInt(partes[1], 10);
+                    } else {
+                        // HH,MM format
+                        totalHoras += parseInt(partes[0], 10);
+                        totalMinutos += parseInt(partes[1], 10);
+                    }
+                } else if (partes.length === 3) {
+                    // If there are 3 parts, assume it is in the HH,MM;SS format
+                    totalHoras += parseInt(partes[0], 10);
+                    totalMinutos += parseInt(partes[1], 10);
+                    totalSegundos += parseInt(partes[2], 10);
+                }
+
+                // Perform correction for minutes and seconds if they exceed 60
+                totalMinutos += Math.floor(totalSegundos / 60);
+                totalSegundos = totalSegundos % 60;
+
+                totalHoras += Math.floor(totalMinutos / 60);
+                totalMinutos = totalMinutos % 60;
+
+                // Add the current value to the history
+                historicoValores.push(valorDigitado);
+                if (historicoValores.length > 3) {
+                    historicoValores.shift(); // Remove the oldest value if there are more than 3
+                }
+                atualizarResultado();
+                atualizarHistorico();
+
+                // Clear the input field after adding
+                document.getElementById('valorInput').value = "";
+
+                // Play sound when adding
+                var som = document.getElementById('som');
+                som.play();
             } else {
-                // HH,MM format
-                totalHoras += parseInt(partes[0], 10);
-                totalMinutos += parseInt(partes[1], 10);
+                alert("Por favor, insira um valor válido no formato HH,MM;SS, HH,MM, MM;SS ou HH,MM;SS.");
             }
-        } else if (partes.length === 3) {
-            // If there are 3 parts, assume it is in the HH,MM;SS format
-            totalHoras += parseInt(partes[0], 10);
-            totalMinutos += parseInt(partes[1], 10);
-            totalSegundos += parseInt(partes[2], 10);
         }
 
-        // Perform correction for minutes and seconds if they exceed 60
-        totalMinutos += Math.floor(totalSegundos / 60);
-        totalSegundos = totalSegundos % 60;
-
-        totalHoras += Math.floor(totalMinutos / 60);
-        totalMinutos = totalMinutos % 60;
-
-        // Add the current value to the history
-        historicoValores.push(valorDigitado);
-        if (historicoValores.length > 3) {
-            historicoValores.shift(); // Remove the oldest value if there are more than 3
-        }
-        atualizarResultado();
-        atualizarHistorico();
-
-        // Clear the input field after adding
-        document.getElementById('valorInput').value = "";
-
-        // Play sound when adding
-        var som = document.getElementById('som');
-        som.play();
-    } else {
-        alert("Por favor, insira um valor válido no formato HH,MM;SS, HH,MM, MM;SS ou HH,MM;SS.");
-    }
-}
-function copiarResultado() {
+        function copiarResultado() {
             var resultado = document.getElementById('resultado').textContent;
             // Create a temporary input element to copy the result
             var tempInput = document.createElement('input');
@@ -132,4 +134,5 @@ function copiarResultado() {
         }
     </script>
 </body>
+
 </html>
